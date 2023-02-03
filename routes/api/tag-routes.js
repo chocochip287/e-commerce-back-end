@@ -12,13 +12,12 @@ router.get('/', (req, res) => {
       {
         model: Product,
         // inner array on ID renames the column to product_id for reduced ambiguity
-        attributes: [["id", "product_id"], "product_name", "price", "stock", "category_id"]
+        attributes: [["id", "product_id"], "product_name"]
       },
     ],
   })
   .then((allTags) => res.status(200).json(allTags))
   .catch((err) => {
-    console.log(err);
     res.status(500).json(`Something went wrong - ${err}`);
   })
 });
@@ -27,23 +26,21 @@ router.get('/:id', (req, res) => {
   // find a single tag by its `id`
   // be sure to include its associated Product data
   Tag.findOne({
-    // selects the product by its ID if the request has a match in the table
+    // selects the tag by its ID if the request has a match in the table
     where: {
       id: req.params.id,
     },
-    // inner arrays to rename different model ID names intended to reduce ambiguity
     attributes: ["id", "tag_name"],
     include: [
       {
         model: Product,
         // inner array on ID renames the column to product_id for reduced ambiguity
-        attributes: [["id", "product_id"], "product_name", "price", "stock", "category_id"]
+        attributes: [["id", "product_id"], "product_name"]
       },
     ],
   })
   .then((allTags) => res.status(200).json(allTags))
   .catch((err) => {
-    console.log(err);
     res.status(500).json(`Something went wrong - ${err}`);
   })
 })
@@ -55,7 +52,7 @@ router.post('/', (req, res) => {
     tag_name: req.body.tag_name
   })
   .then((newTag) => res.json(newTag))
-  .catch((err) => res.json(err));
+  .catch((err) => res.status(500).json(`Something went wrong - ${err}`));
 });
 
 router.put('/:id', (req, res) => {
@@ -89,7 +86,7 @@ router.delete('/:id', (req, res) => {
     if (thisTag) {
       res.status(200).json(`The tag with ID ${req.params.id} has been deleted.`);
     } else {
-      res.status(400).json(`No product with ID ${req.params.id} exists.`);
+      res.status(400).json(`No tag with ID ${req.params.id} exists.`);
     }
   })
 });

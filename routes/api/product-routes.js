@@ -25,7 +25,6 @@ router.get('/', (req, res) => {
   // return all products with status code 200
   .then((allProducts) => res.status(200).json(allProducts))
   .catch((err) => {
-    console.log(err);
     res.status(500).json(`Something went wrong - ${err}`);
   })
 });
@@ -39,8 +38,8 @@ router.get('/:id', (req, res) => {
     where: {
       id: req.params.id,
     },
-    // inner arrays to rename different model ID names intended to reduce ambiguity
     attributes: ["id", "product_name", "price", "stock", "category_id"],
+    // inner arrays to rename different model ID names intended to reduce ambiguity
     include: [
       {
         model: Category,
@@ -54,7 +53,6 @@ router.get('/:id', (req, res) => {
   })
   .then((thisProduct) => res.json(thisProduct))
   .catch((err) => {
-    console.log(err);
     res.status(500).json(`Something went wrong - ${err}`);
   })
 });
@@ -86,7 +84,6 @@ router.post('/', (req, res) => {
     })
     .then((productTagIds) => res.status(200).json(productTagIds))
     .catch((err) => {
-      console.log(err);
       res.status(400).json(err);
     });
 });
