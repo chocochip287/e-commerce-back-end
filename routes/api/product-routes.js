@@ -1,18 +1,62 @@
 const router = require('express').Router();
 const { Product, Category, Tag, ProductTag } = require('../../models');
 
-// The `/api/products` endpoint
+// The `/api/products` endpoint - use this after your localhost link
 
 // get all products
 router.get('/', (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
+  Product.findAll({
+    attributes: ["id", "product_name", "price", "stock", "category_id"],
+    include: [
+      {
+        model: Category,
+        // consider inner array for column names if results are ambiguous
+        attributes: ["id", "category_id", "category_name"]
+      },
+      {
+        model: Tag,
+        // see comment above - look at route before committing
+        attributes: ["id", "tag_name"]
+      }
+    ]
+  })
+  // return all products with status code 200
+  .then((allProducts) => res.status(200).json(allProducts))
+  .catch((err) => {
+    console.log(err);
+    res.status(500).send("Something went wrong.").json(err);
+  })
 });
 
 // get one product
 router.get('/:id', (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
+  Product.findOne({
+    // selects the product by the its ID if the request has a match in the table
+    where: {
+      id: req.params.id,
+    },
+    // see above notes in findAll about possibly using inner arrays on the includes
+    attributes: ["id", "product_name", "price", "stock", "category_id"],
+    include: [
+      {
+        model: Category,
+        attributes: ["id", "category_name"],
+      },
+      {
+        model: Tag,
+        attributes: ["id", "tag_name"],
+      },
+    ]
+  })
+  .then((thisProduct) => res.json(thisProduct))
+  .catch((err) => {
+    console.log(err);
+    res.status(500).send("Something went wrong.").json(err);
+  })
 });
 
 // create new product
@@ -91,6 +135,20 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req, res) => {
   // delete one product by its `id` value
+  Product.destroy({
+    where: {
+      id: req.params.id,
+    },
+  })
+  .then((thisProduct) => {
+    if (thisProduct) {
+      res.status(200).send(`The product with ID ${req.params.id} has been deleted.`);
+      return;
+    } else {
+      res.status(400).send(`No product with ID ${req.params.id} exists.`);
+      return;
+    }
+  })
 });
 
 module.exports = router;
