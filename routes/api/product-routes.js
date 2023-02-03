@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
   .then((allProducts) => res.status(200).json(allProducts))
   .catch((err) => {
     console.log(err);
-    res.status(500).send("Something went wrong.").json(err);
+    res.status(500).json(`Something went wrong - ${err}`);
   })
 });
 
@@ -35,27 +35,27 @@ router.get('/:id', (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
   Product.findOne({
-    // selects the product by the its ID if the request has a match in the table
+    // selects the product by its ID if the request has a match in the table
     where: {
       id: req.params.id,
     },
-    // see above notes in findAll about possibly using inner arrays on the includes
+    // inner arrays to rename different model ID names intended to reduce ambiguity
     attributes: ["id", "product_name", "price", "stock", "category_id"],
     include: [
       {
         model: Category,
-        attributes: ["id", "category_name"],
+        attributes: [["id", "category_id"], "category_name"],
       },
       {
         model: Tag,
-        attributes: ["id", "tag_name"],
+        attributes: [["id", "tag_id"], "tag_name"],
       },
     ]
   })
   .then((thisProduct) => res.json(thisProduct))
   .catch((err) => {
     console.log(err);
-    res.status(500).send("Something went wrong.").json(err);
+    res.status(500).json(`Something went wrong - ${err}`);
   })
 });
 
@@ -63,10 +63,10 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
   /* req.body should look like this...
     {
-      product_name: "Basketball",
-      price: 200.00,
-      stock: 3,
-      tagIds: [1, 2, 3, 4]
+      "product_name": "Basketball",
+      "price": 200.00,
+      "stock": 3,
+      "tagIds": [1, 2, 3, 4]
     }
   */
   Product.create(req.body)
@@ -144,10 +144,8 @@ router.delete('/:id', (req, res) => {
   .then((thisProduct) => {
     if (thisProduct) {
       res.status(200).json(`The product with ID ${req.params.id} has been deleted.`);
-      return;
     } else {
       res.status(400).json(`No product with ID ${req.params.id} exists.`);
-      return;
     }
   })
 });
