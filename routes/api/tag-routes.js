@@ -26,30 +26,27 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   // find a single tag by its `id`
   // be sure to include its associated Product data
-  Product.findOne({
+  Tag.findOne({
     // selects the product by its ID if the request has a match in the table
     where: {
       id: req.params.id,
     },
     // inner arrays to rename different model ID names intended to reduce ambiguity
-    attributes: ["id", "product_name", "price", "stock", "category_id"],
+    attributes: ["id", "tag_name"],
     include: [
       {
-        model: Category,
-        attributes: [["id", "category_id"], "category_name"],
+        model: Product,
+        // inner array on ID renames the column to product_id for reduced ambiguity
+        attributes: [["id", "product_id"], "product_name", "price", "stock", "category_id"]
       },
-      {
-        model: Tag,
-        attributes: [["id", "tag_id"]]
-      }
-    ]
+    ],
   })
-  .then((thisTag) => res.json(thisTag))
+  .then((allTags) => res.status(200).json(allTags))
   .catch((err) => {
     console.log(err);
     res.status(500).json(`Something went wrong - ${err}`);
   })
-});
+})
 
 router.post('/', (req, res) => {
   // create a new tag
@@ -74,7 +71,7 @@ router.put('/:id', (req, res) => {
   })
   .then((tagUpdate) => {
     if (tagUpdate) {
-      res.status(200).json(`The tag at ID ${req.params.id} has been updated to ${req.body.name}.`);
+      res.status(200).json(`The tag at ID ${req.params.id} has been updated to ${req.body.tag_name}.`);
     } else {
       res.status(500).json(`Something went wrong - ${err}`);
     }
