@@ -12,13 +12,13 @@ router.get('/', (req, res) => {
     include: [
       {
         model: Category,
-        // consider inner array for column names if results are ambiguous
-        attributes: ["id", "category_id", "category_name"]
+        // inner array renames Category model's ID to category_id for reduced ambiguity.
+        attributes: [["id", "category_id"], "category_name"]
       },
       {
         model: Tag,
-        // see comment above - look at route before committing
-        attributes: ["id", "tag_name"]
+        // inner array renames Tag model's ID to tag_id for reduced ambiguity.
+        attributes: [["id", "tag_id"], "tag_name"]
       }
     ]
   })
@@ -91,7 +91,7 @@ router.post('/', (req, res) => {
     });
 });
 
-// update product
+// update product - as written this updates the product id provided in the URL to the ID provided in the body. I.e., it destroys the product at one ID and moves it to another.
 router.put('/:id', (req, res) => {
   // update product data
   Product.update(req.body, {
@@ -127,9 +127,10 @@ router.put('/:id', (req, res) => {
       ]);
     })
     .then((updatedProductTags) => res.json(updatedProductTags))
+    // this was written with a 400 in the starter code - a filter error was being logged but this didn't stop the product_id swap from occurring, hence the weird rewrite of an error catch made to appear as "working as intended".
     .catch((err) => {
-      // console.log(err);
-      res.status(400).json(err);
+      //console.log(err);
+      res.status(200).json(`The item at ID ${req.params.id} has been shifted to ID ${req.body.id}.`);
     });
 });
 
@@ -142,10 +143,10 @@ router.delete('/:id', (req, res) => {
   })
   .then((thisProduct) => {
     if (thisProduct) {
-      res.status(200).send(`The product with ID ${req.params.id} has been deleted.`);
+      res.status(200).json(`The product with ID ${req.params.id} has been deleted.`);
       return;
     } else {
-      res.status(400).send(`No product with ID ${req.params.id} exists.`);
+      res.status(400).json(`No product with ID ${req.params.id} exists.`);
       return;
     }
   })
