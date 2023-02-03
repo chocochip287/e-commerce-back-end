@@ -7,14 +7,14 @@ router.get('/', (req, res) => {
   // find all categories
   // be sure to include its associated Products
   Category.findAll({
-    attributes: ["id", "tag_name"],
+    attributes: ["id", "category_name"],
     include: [{
       model: Product,
       // inner array on ID renames the column to product_id for reduced ambiguity
       attributes: [["id", "product_id"], "product_name"]
     }]
   })
-  then((allCats) => res.status(200).json(allCats))
+  .then((allCats) => res.status(200).json(allCats))
   .catch((err) => {
     res.status(500).json(`Something went wrong - ${err}`);
   })
@@ -28,14 +28,14 @@ router.get('/:id', (req, res) => {
     where: {
       id: req.params.id,
     },
-    attributes: ["id", "tag_name"],
+    attributes: ["id", "category_name"],
     // inner array renames different model ID to reduce ambiguity
     include: [{
       model: Product,
       attributes: [["id", "product_id"], "product_name"]
     }]
   })
-  then((thisCat) => res.json(thisCat))
+  .then((thisCat) => res.json(thisCat))
   .catch((err) => {
     res.status(500).json(`Something went wrong - ${err}`);
   })
@@ -80,7 +80,7 @@ router.delete('/:id', (req, res) => {
   })
   .then((thisCat) => {
     if (thisCat) {
-      res.status(200).json(`The category with ID ${req.params.id}.`);
+      res.status(200).json(`The category with ID ${req.params.id} has been deleted.`);
     } else {
       res.status(400).json(`No category with ID ${req.params.id} exists.`);
     }
